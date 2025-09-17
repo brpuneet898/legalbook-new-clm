@@ -12,28 +12,35 @@
     }
 
     function toggleTheme() {
-      const html = document.documentElement;
-      html.classList.toggle('dark');
+        const html = document.documentElement;
+        html.classList.toggle('dark');
 
-      const themeBtn = document.getElementById("theme-toggle");
-      if (html.classList.contains("dark")) {
-        themeBtn.textContent = "Light Mode";
-      } else {
-        themeBtn.textContent = "Dark Mode";
-      }
+        const isDark = html.classList.contains("dark");
+        localStorage.setItem("theme", isDark ? "dark" : "light");
+
+        const themeBtn = document.getElementById("theme-toggle");
+        themeBtn.textContent = isDark ? "Light Mode" : "Dark Mode";
     }
 
-    // Dummy New Contract function
+    // Show modal
     function newContract() {
-      alert("New Contract button clicked! Functionality coming soon.");
+        document.getElementById("newContractModal").classList.remove("hidden");
+    }
+
+    // Close modal
+    function closeModal() {
+        document.getElementById("newContractModal").classList.add("hidden");
     }
 
     // Optional: start in light mode by default
     window.onload = function() {
-      const html = document.documentElement;
-      html.classList.remove("dark"); // start in light
-      document.getElementById("theme-toggle").textContent = "Dark Mode";
-    }
+        const theme = localStorage.getItem("theme");
+        if (theme === "dark") {
+            document.documentElement.classList.add("dark");
+        } else {
+            document.documentElement.classList.remove("dark");
+        }
+    };
   </script>
 </head>
 <body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 font-sans">
@@ -125,5 +132,52 @@
       </div>
     </main>
   </div>
+
+  <!-- New Contract Modal -->
+    <div id="newContractModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white dark:bg-gray-800 w-[700px] rounded-lg shadow-lg p-6 relative">
+        <h2 class="text-lg text-gray-800 dark:text-gray-100 mb-4">
+        Choose how you’d like to create your contract. Our AI can generate a custom contract from scratch, 
+        or you can start with a proven template.
+        </h2>
+
+        <div class="grid grid-cols-2 gap-4">
+        <!-- AI Draft Generation -->
+        <div class="border rounded-lg p-6 bg-blue-50 dark:bg-blue-900/20">
+            <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center space-x-2">
+                <div class="bg-blue-600 text-white p-2 rounded">
+                ⚡
+                </div>
+                <h3 class="font-semibold text-blue-700 dark:text-blue-300">AI Draft Generation</h3>
+            </div>
+            <span class="text-xs bg-blue-600 text-white px-2 py-1 rounded">Recommended</span>
+            </div>
+            <ul class="text-sm text-gray-600 dark:text-gray-300 space-y-1 mb-4">
+            <li>✔ Intelligent clause suggestions</li>
+            <li>✔ Risk analysis & compliance</li>
+            <li>✔ Industry best practices</li>
+            </ul>
+            <a href="{{ url_for('ai_generate_draft') }}" class="text-blue-600 dark:text-blue-400 font-medium">Generate with AI →</a>
+        </div>
+
+        <!-- Use Existing Template -->
+        <div class="border rounded-lg p-6 bg-gray-50 dark:bg-gray-700/50">
+            <h3 class="font-semibold text-gray-800 dark:text-gray-200 mb-2">Use Existing Template</h3>
+            <ul class="text-sm text-gray-600 dark:text-gray-300 space-y-1 mb-4">
+            <li>✔ 129+ contract templates</li>
+            <li>✔ Pre-approved legal language</li>
+            <li>✔ Faster creation process</li>
+            </ul>
+            <button class="text-blue-600 dark:text-blue-400 font-medium">Browse Templates →</button>
+        </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="mt-6 text-right">
+        <button onclick="closeModal()" class="px-4 py-2 rounded bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200">Cancel</button>
+        </div>
+    </div>
+    </div>
 </body>
 </html>

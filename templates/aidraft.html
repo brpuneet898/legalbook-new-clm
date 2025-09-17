@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Draft - Step 1</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    // Restore theme from localStorage
+    document.addEventListener("DOMContentLoaded", () => {
+      const theme = localStorage.getItem("theme");
+      if (theme === "dark") {
+        document.documentElement.classList.add("dark");
+      } else {
+        document.documentElement.classList.remove("dark");
+      }
+    });
+
+    function selectFromCard(radio) {
+      document.getElementById("contract_dropdown").value = radio.value;
+      validateForm();
+    }
+
+    function validateForm() {
+      const selected = document.querySelector('input[name="contract_type"]:checked');
+      const dropdown = document.getElementById("contract_dropdown");
+      const title = document.getElementById("contract_title").value.trim();
+      const nextBtn = document.getElementById("nextBtn");
+
+      // Sync dropdown -> radio
+      if (dropdown.value && (!selected || selected.value !== dropdown.value)) {
+        const radioToCheck = document.querySelector(`input[name="contract_type"][value="${dropdown.value}"]`);
+        if (radioToCheck) radioToCheck.checked = true;
+      }
+
+      // Enable Next Step only if both selected + title filled
+      if (dropdown.value && title.length > 0) {
+        nextBtn.disabled = false;
+        nextBtn.classList.remove("bg-gray-400", "cursor-not-allowed");
+        nextBtn.classList.add("bg-blue-600", "hover:bg-blue-700");
+      } else {
+        nextBtn.disabled = true;
+        nextBtn.classList.add("bg-gray-400", "cursor-not-allowed");
+        nextBtn.classList.remove("bg-blue-600", "hover:bg-blue-700");
+      }
+    }
+  </script>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 flex items-center justify-center min-h-screen font-sans">
+
+  <div class="bg-white dark:bg-gray-800 w-[700px] rounded-lg shadow-lg p-6">
+    <!-- Progress bar -->
+    <div class="w-full bg-gray-200 rounded-full h-1.5 mb-4">
+      <div class="bg-blue-600 h-1.5 rounded-full" style="width: 33%"></div>
+    </div>
+    <p class="text-sm text-gray-600 dark:text-gray-300 mb-4">Step 1 of 3</p>
+
+    <!-- Contract Type -->
+    <h2 class="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-100">Contract Type</h2>
+    <p class="text-sm mb-2 text-gray-500">Most Used 
+      <span class="ml-2 text-xs text-blue-600 bg-blue-100 px-2 py-0.5 rounded">Popular</span>
+    </p>
+
+    <div class="grid grid-cols-3 gap-3 mb-4">
+      <!-- Card 1 -->
+      <label class="border rounded p-3 cursor-pointer hover:border-blue-500 peer-checked:bg-white dark:peer-checked:bg-gray-700">
+        <input type="radio" name="contract_type" value="Software License" 
+               class="hidden" onchange="selectFromCard(this)">
+        <div class="text-center">
+          💻<br>
+          <span class="font-medium">Software License</span><br>
+          <span class="text-xs text-gray-500">24% usage</span>
+        </div>
+      </label>
+
+      <!-- Card 2 -->
+      <label class="border rounded p-3 cursor-pointer hover:border-blue-500">
+        <input type="radio" name="contract_type" value="Service Agreement" 
+               class="hidden" onchange="selectFromCard(this)">
+        <div class="text-center">
+          🛠️<br>
+          <span class="font-medium">Service Agreement</span><br>
+          <span class="text-xs text-gray-500">18% usage</span>
+        </div>
+      </label>
+
+      <!-- Card 3 -->
+      <label class="border rounded p-3 cursor-pointer hover:border-blue-500">
+        <input type="radio" name="contract_type" value="Non-Disclosure Agreement" 
+               class="hidden" onchange="selectFromCard(this)">
+        <div class="text-center">
+          🔒<br>
+          <span class="font-medium">Non-Disclosure Agreement</span><br>
+          <span class="text-xs text-gray-500">15% usage</span>
+        </div>
+      </label>
+
+      <!-- Card 4 -->
+      <label class="border rounded p-3 cursor-pointer hover:border-blue-500">
+        <input type="radio" name="contract_type" value="Consulting Agreement" 
+               class="hidden" onchange="selectFromCard(this)">
+        <div class="text-center">
+          📑<br>
+          <span class="font-medium">Consulting Agreement</span><br>
+          <span class="text-xs text-gray-500">12% usage</span>
+        </div>
+      </label>
+
+      <!-- Card 5 -->
+      <label class="border rounded p-3 cursor-pointer hover:border-blue-500">
+        <input type="radio" name="contract_type" value="Employment Contract" 
+               class="hidden" onchange="selectFromCard(this)">
+        <div class="text-center">
+          👥<br>
+          <span class="font-medium">Employment Contract</span><br>
+          <span class="text-xs text-gray-500">10% usage</span>
+        </div>
+      </label>
+
+      <!-- Card 6 -->
+      <label class="border rounded p-3 cursor-pointer hover:border-blue-500">
+        <input type="radio" name="contract_type" value="Vendor Agreement" 
+               class="hidden" onchange="selectFromCard(this)">
+        <div class="text-center">
+          🤝<br>
+          <span class="font-medium">Vendor Agreement</span><br>
+          <span class="text-xs text-gray-500">8% usage</span>
+        </div>
+      </label>
+    </div>
+
+    <!-- Dropdown -->
+    <select id="contract_dropdown" class="w-full border rounded p-2 mb-4" onchange="validateForm()">
+      <option value="">Browse all contract types (129+ available)</option>
+      <option>Software License</option>
+      <option>Service Agreement</option>
+      <option>Non-Disclosure Agreement</option>
+      <option>Consulting Agreement</option>
+      <option>Employment Contract</option>
+      <option>Vendor Agreement</option>
+      <option>Partnership Agreement</option>
+      <option>Lease Agreement</option>
+      <option>Joint Venture Contract</option>
+      <option>Distribution Agreement</option>
+    </select>
+
+    <!-- Title -->
+    <input type="text" id="contract_title" onkeyup="validateForm()" 
+           placeholder="e.g. Software License Agreement - TechCorp" 
+           class="w-full border rounded p-2 mb-6">
+
+    <!-- Footer -->
+    <div class="flex justify-between">
+      <a href="{{ url_for('index') }}" 
+         class="px-4 py-2 rounded bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
+         Cancel
+      </a>
+      <button id="nextBtn" disabled 
+              class="px-4 py-2 rounded bg-gray-400 text-white cursor-not-allowed">
+              Next Step
+      </button>
+    </div>
+  </div>
+
+</body>
+</html>
