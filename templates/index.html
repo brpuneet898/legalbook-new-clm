@@ -1,13 +1,129 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LegalBook CLM</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LegalBook CLM</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    // Ensure Tailwind respects manual dark mode toggling
+    tailwind.config = {
+      darkMode: 'class'
+    }
+
+    function toggleTheme() {
+      const html = document.documentElement;
+      html.classList.toggle('dark');
+
+      const themeBtn = document.getElementById("theme-toggle");
+      if (html.classList.contains("dark")) {
+        themeBtn.textContent = "Light Mode";
+      } else {
+        themeBtn.textContent = "Dark Mode";
+      }
+    }
+
+    // Dummy New Contract function
+    function newContract() {
+      alert("New Contract button clicked! Functionality coming soon.");
+    }
+
+    // Optional: start in light mode by default
+    window.onload = function() {
+      const html = document.documentElement;
+      html.classList.remove("dark"); // start in light
+      document.getElementById("theme-toggle").textContent = "Dark Mode";
+    }
+  </script>
 </head>
-<body>
-    <h1>Welcome to LegalBook CLM</h1>
-    <p>This is the starting point for your application.</p>
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 font-sans">
+  <div class="flex h-screen">
+    <!-- Sidebar -->
+    <aside class="w-64 bg-white dark:bg-gray-800 shadow-lg flex flex-col">
+      <div class="p-4 text-xl font-bold text-blue-600 dark:text-blue-400">ContFlow<br><span class="text-sm text-gray-500 dark:text-gray-400">CLM Platform</span></div>
+      <button onclick="newContract()" class="m-4 py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg">+ New Contract</button>
+      <nav class="flex-1 px-4 space-y-3 text-gray-700 dark:text-gray-300">
+        <a href="#" class="block hover:text-blue-600">Dashboard</a>
+        <a href="#" class="block hover:text-blue-600">Contracts</a>
+        <a href="#" class="block hover:text-blue-600">Clause Library</a>
+        <a href="#" class="block hover:text-blue-600">Counterparties</a>
+        <a href="#" class="block hover:text-blue-600">Repository</a>
+        <a href="#" class="block hover:text-blue-600">Analytics</a>
+        <a href="#" class="block hover:text-blue-600">Settings</a>
+      </nav>
+      <div class="p-4">
+        <button id="theme-toggle" onclick="toggleTheme()" class="w-full py-2 px-4 bg-gray-200 dark:bg-gray-700 rounded-lg">Dark Mode</button>
+      </div>
+      <div class="p-4 text-sm text-gray-500 dark:text-gray-400">
+        <div class="font-semibold">John Doe</div>
+        <div>Legal Manager</div>
+      </div>
+    </aside>
+
+    <!-- Main Dashboard -->
+    <main class="flex-1 p-6 overflow-y-auto">
+      <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold">Dashboard</h1>
+        <div class="flex space-x-2">
+          <button class="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-lg">Export</button>
+          <button onclick="newContract()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg">+ New Contract</button>
+        </div>
+      </div>
+
+      <!-- Top Stats -->
+      <div class="grid grid-cols-4 gap-4 mb-6">
+        <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
+          <div class="text-sm text-gray-500 dark:text-gray-400">Total Contract Value</div>
+          <div class="text-2xl font-bold">$2.4M</div>
+          <div class="text-green-500">+12.5%</div>
+        </div>
+        <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
+          <div class="text-sm text-gray-500 dark:text-gray-400">Active Contracts</div>
+          <div class="text-2xl font-bold">47</div>
+          <div class="text-green-500">+8.2%</div>
+        </div>
+        <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
+          <div class="text-sm text-gray-500 dark:text-gray-400">Pending Review</div>
+          <div class="text-2xl font-bold">12</div>
+          <div class="text-red-500">-15.3%</div>
+        </div>
+        <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
+          <div class="text-sm text-gray-500 dark:text-gray-400">AI Risk Score</div>
+          <div class="text-2xl font-bold">86%</div>
+          <div class="text-green-500">+3.1%</div>
+        </div>
+      </div>
+
+      <!-- Middle Section -->
+      <div class="grid grid-cols-3 gap-6">
+        <!-- Contract Lifecycle -->
+        <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
+          <h2 class="font-semibold mb-2">Contract Lifecycle</h2>
+          <div class="flex justify-center items-center h-48 text-lg font-bold">95 Total Contracts</div>
+        </div>
+
+        <!-- Task Calendar -->
+        <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
+          <h2 class="font-semibold mb-2">Task Calendar</h2>
+          <div class="text-center">[Calendar Placeholder]</div>
+          <div class="mt-4 text-sm">Upcoming Task: Review TechCorp Contract</div>
+        </div>
+
+        <!-- AI Insights -->
+        <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
+          <h2 class="font-semibold mb-2">AI Insights</h2>
+          <div class="p-2 bg-red-100 text-red-800 rounded mb-2">
+            Contract Renewal Alert (HIGH)
+          </div>
+          <div class="p-2 bg-yellow-100 text-yellow-800 rounded mb-2">
+            Optimization Opportunity (MEDIUM)
+          </div>
+          <div class="p-2 bg-blue-100 text-blue-800 rounded">
+            Review Required (HIGH)
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
 </body>
 </html>
