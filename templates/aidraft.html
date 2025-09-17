@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI Draft - Step 1</title>
+  <title>AI Draft Creation</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     // Restore theme from localStorage
@@ -16,25 +16,23 @@
       }
     });
 
-    function selectFromCard(radio) {
-      document.getElementById("contract_dropdown").value = radio.value;
-      validateForm();
+    function goToStep(step) {
+      document.querySelectorAll(".step").forEach(s => s.classList.add("hidden"));
+      document.getElementById("step" + step).classList.remove("hidden");
     }
 
-    function validateForm() {
-      const selected = document.querySelector('input[name="contract_type"]:checked');
-      const dropdown = document.getElementById("contract_dropdown");
+    // -------- Step 1 validation --------
+    function selectFromCard(radio) {
+      document.getElementById("contract_dropdown").value = radio.value;
+      validateStep1();
+    }
+
+    function validateStep1() {
+      const dropdown = document.getElementById("contract_dropdown").value;
       const title = document.getElementById("contract_title").value.trim();
       const nextBtn = document.getElementById("nextBtn");
 
-      // Sync dropdown -> radio
-      if (dropdown.value && (!selected || selected.value !== dropdown.value)) {
-        const radioToCheck = document.querySelector(`input[name="contract_type"][value="${dropdown.value}"]`);
-        if (radioToCheck) radioToCheck.checked = true;
-      }
-
-      // Enable Next Step only if both selected + title filled
-      if (dropdown.value && title.length > 0) {
+      if (dropdown && title) {
         nextBtn.disabled = false;
         nextBtn.classList.remove("bg-gray-400", "cursor-not-allowed");
         nextBtn.classList.add("bg-blue-600", "hover:bg-blue-700");
@@ -44,123 +42,314 @@
         nextBtn.classList.remove("bg-blue-600", "hover:bg-blue-700");
       }
     }
+
+    // -------- Step 2 validation --------
+    function validateStep2() {
+      const value = document.getElementById("contract_value").value.trim();
+      const currency = document.getElementById("currency").value;
+      const start = document.getElementById("start_date").value;
+      const end = document.getElementById("end_date").value;
+      const terms = document.getElementById("payment_terms").value;
+      const nextBtn2 = document.getElementById("nextBtn2");
+
+      if (value && currency && start && end && terms) {
+        nextBtn2.disabled = false;
+        nextBtn2.classList.remove("bg-gray-400", "cursor-not-allowed");
+        nextBtn2.classList.add("bg-blue-600", "hover:bg-blue-700");
+      } else {
+        nextBtn2.disabled = true;
+        nextBtn2.classList.add("bg-gray-400", "cursor-not-allowed");
+        nextBtn2.classList.remove("bg-blue-600", "hover:bg-blue-700");
+      }
+    }
+
+    // -------- Step 3 validation (dummy for now) --------
+    function validateStep3() {
+        const cpName = document.getElementById("cp_name").value.trim();
+        const cpEmail = document.getElementById("cp_email").value.trim();
+        const cpAddress = document.getElementById("cp_address").value.trim();
+        const desc = document.getElementById("contract_desc").value.trim();
+        const deliverables = document.getElementById("key_deliverables").value.trim();
+        const assignee = document.getElementById("assignee").value;
+        const clauses = document.getElementById("special_clauses").value.trim();
+        const reviewBtn = document.getElementById("reviewBtn");
+
+        if (cpName && cpEmail && cpAddress && desc && deliverables && assignee && clauses) {
+            reviewBtn.disabled = false;
+            reviewBtn.classList.remove("bg-gray-400", "cursor-not-allowed");
+            reviewBtn.classList.add("bg-blue-600", "hover:bg-blue-700");
+        } else {
+            reviewBtn.disabled = true;
+            reviewBtn.classList.add("bg-gray-400", "cursor-not-allowed");
+            reviewBtn.classList.remove("bg-blue-600", "hover:bg-blue-700");
+        }
+    }
+
+    function populateReview() {
+        // Collect all values from Steps 1–3
+        const contractType = document.getElementById("contract_dropdown").value;
+        const contractTitle = document.getElementById("contract_title").value;
+
+        const contractValue = document.getElementById("contract_value").value;
+        const currency = document.getElementById("currency").value;
+        const startDate = document.getElementById("start_date").value;
+        const endDate = document.getElementById("end_date").value;
+        const paymentTerms = document.getElementById("payment_terms").value;
+        const autoRenew = document.getElementById("auto_renew").checked ? "Yes" : "No";
+
+        const cpName = document.getElementById("cp_name").value;
+        const cpEmail = document.getElementById("cp_email").value;
+        const cpAddress = document.getElementById("cp_address").value;
+        const desc = document.getElementById("contract_desc").value;
+        const deliverables = document.getElementById("key_deliverables").value;
+        const assignee = document.getElementById("assignee").value;
+        const priority = document.getElementById("priority").value;
+        const clauses = document.getElementById("special_clauses").value;
+
+        // Build summary HTML
+        const reviewHtml = `
+            <div><strong>Contract Type:</strong> ${contractType}</div>
+            <div><strong>Contract Title:</strong> ${contractTitle}</div>
+            
+            <hr class="my-2">
+            <div><strong>Contract Value:</strong> ${contractValue} ${currency}</div>
+            <div><strong>Start Date:</strong> ${startDate}</div>
+            <div><strong>End Date:</strong> ${endDate}</div>
+            <div><strong>Payment Terms:</strong> ${paymentTerms}</div>
+            <div><strong>Auto Renewal:</strong> ${autoRenew}</div>
+
+            <hr class="my-2">
+            <div><strong>Counterparty Name:</strong> ${cpName}</div>
+            <div><strong>Email:</strong> ${cpEmail}</div>
+            <div><strong>Registered Office:</strong> ${cpAddress}</div>
+
+            <hr class="my-2">
+            <div><strong>Contract Description:</strong> ${desc}</div>
+            <div><strong>Key Deliverables:</strong> ${deliverables}</div>
+            <div><strong>Assigned To:</strong> ${assignee}</div>
+            <div><strong>Priority:</strong> ${priority}</div>
+            <div><strong>Special Clauses:</strong> ${clauses}</div>
+        `;
+
+        document.getElementById("reviewContent").innerHTML = reviewHtml;
+
+        // Move to Step 4
+        goToStep(4);
+    }
+
   </script>
 </head>
 <body class="bg-gray-100 dark:bg-gray-900 flex items-center justify-center min-h-screen font-sans">
 
   <div class="bg-white dark:bg-gray-800 w-[700px] rounded-lg shadow-lg p-6">
-    <!-- Progress bar -->
-    <div class="w-full bg-gray-200 rounded-full h-1.5 mb-4">
-      <div class="bg-blue-600 h-1.5 rounded-full" style="width: 33%"></div>
-    </div>
-    <p class="text-sm text-gray-600 dark:text-gray-300 mb-4">Step 1 of 3</p>
 
-    <!-- Contract Type -->
-    <h2 class="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-100">Contract Type</h2>
-    <p class="text-sm mb-2 text-gray-500">Most Used 
-      <span class="ml-2 text-xs text-blue-600 bg-blue-100 px-2 py-0.5 rounded">Popular</span>
-    </p>
+    <!-- ========== STEP 1 ========== -->
+    <div id="step1" class="step">
+      <div class="w-full bg-gray-200 rounded-full h-1.5 mb-4">
+        <div class="bg-blue-600 h-1.5 rounded-full" style="width: 33%"></div>
+      </div>
+      <p class="text-sm text-gray-600 dark:text-gray-300 mb-4">Step 1 of 3</p>
 
-    <div class="grid grid-cols-3 gap-3 mb-4">
-      <!-- Card 1 -->
-      <label class="border rounded p-3 cursor-pointer hover:border-blue-500 peer-checked:bg-white dark:peer-checked:bg-gray-700">
-        <input type="radio" name="contract_type" value="Software License" 
-               class="hidden" onchange="selectFromCard(this)">
-        <div class="text-center">
-          💻<br>
-          <span class="font-medium">Software License</span><br>
-          <span class="text-xs text-gray-500">24% usage</span>
-        </div>
-      </label>
+      <h2 class="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-100">Contract Type</h2>
+      <p class="text-sm mb-2 text-gray-500">Most Used 
+        <span class="ml-2 text-xs text-blue-600 bg-blue-100 px-2 py-0.5 rounded">Popular</span>
+      </p>
 
-      <!-- Card 2 -->
-      <label class="border rounded p-3 cursor-pointer hover:border-blue-500">
-        <input type="radio" name="contract_type" value="Service Agreement" 
-               class="hidden" onchange="selectFromCard(this)">
-        <div class="text-center">
-          🛠️<br>
-          <span class="font-medium">Service Agreement</span><br>
-          <span class="text-xs text-gray-500">18% usage</span>
-        </div>
-      </label>
+      <!-- Contract cards -->
+      <div class="grid grid-cols-3 gap-3 mb-4">
+        <label class="border rounded p-3 cursor-pointer hover:border-blue-500 peer-checked:bg-white dark:peer-checked:bg-gray-700">
+          <input type="radio" name="contract_type" value="Software License" class="hidden peer" onchange="selectFromCard(this)">
+          <div class="text-center">💻<br><span class="font-medium">Software License</span><br><span class="text-xs text-gray-500">24% usage</span></div>
+        </label>
+        <label class="border rounded p-3 cursor-pointer hover:border-blue-500 peer-checked:bg-white dark:peer-checked:bg-gray-700">
+          <input type="radio" name="contract_type" value="Service Agreement" class="hidden peer" onchange="selectFromCard(this)">
+          <div class="text-center">🛠️<br><span class="font-medium">Service Agreement</span><br><span class="text-xs text-gray-500">18% usage</span></div>
+        </label>
+        <label class="border rounded p-3 cursor-pointer hover:border-blue-500 peer-checked:bg-white dark:peer-checked:bg-gray-700">
+          <input type="radio" name="contract_type" value="Non-Disclosure Agreement" class="hidden peer" onchange="selectFromCard(this)">
+          <div class="text-center">🔒<br><span class="font-medium">NDA</span><br><span class="text-xs text-gray-500">15% usage</span></div>
+        </label>
+        <label class="border rounded p-3 cursor-pointer hover:border-blue-500 peer-checked:bg-white dark:peer-checked:bg-gray-700">
+          <input type="radio" name="contract_type" value="Consulting Agreement" class="hidden peer" onchange="selectFromCard(this)">
+          <div class="text-center">📑<br><span class="font-medium">Consulting Agreement</span><br><span class="text-xs text-gray-500">12% usage</span></div>
+        </label>
+        <label class="border rounded p-3 cursor-pointer hover:border-blue-500 peer-checked:bg-white dark:peer-checked:bg-gray-700">
+          <input type="radio" name="contract_type" value="Employment Contract" class="hidden peer" onchange="selectFromCard(this)">
+          <div class="text-center">👥<br><span class="font-medium">Employment Contract</span><br><span class="text-xs text-gray-500">10% usage</span></div>
+        </label>
+        <label class="border rounded p-3 cursor-pointer hover:border-blue-500 peer-checked:bg-white dark:peer-checked:bg-gray-700">
+          <input type="radio" name="contract_type" value="Vendor Agreement" class="hidden peer" onchange="selectFromCard(this)">
+          <div class="text-center">🤝<br><span class="font-medium">Vendor Agreement</span><br><span class="text-xs text-gray-500">8% usage</span></div>
+        </label>
+      </div>
 
-      <!-- Card 3 -->
-      <label class="border rounded p-3 cursor-pointer hover:border-blue-500">
-        <input type="radio" name="contract_type" value="Non-Disclosure Agreement" 
-               class="hidden" onchange="selectFromCard(this)">
-        <div class="text-center">
-          🔒<br>
-          <span class="font-medium">Non-Disclosure Agreement</span><br>
-          <span class="text-xs text-gray-500">15% usage</span>
-        </div>
-      </label>
+      <!-- Dropdown -->
+      <select id="contract_dropdown" class="w-full border rounded p-2 mb-4" onchange="validateStep1()">
+        <option value="">Browse all contract types (129+ available)</option>
+        <option>Software License</option>
+        <option>Service Agreement</option>
+        <option>Non-Disclosure Agreement</option>
+        <option>Consulting Agreement</option>
+        <option>Employment Contract</option>
+        <option>Vendor Agreement</option>
+        <option>Partnership Agreement</option>
+        <option>Lease Agreement</option>
+        <option>Joint Venture Contract</option>
+        <option>Distribution Agreement</option>
+      </select>
 
-      <!-- Card 4 -->
-      <label class="border rounded p-3 cursor-pointer hover:border-blue-500">
-        <input type="radio" name="contract_type" value="Consulting Agreement" 
-               class="hidden" onchange="selectFromCard(this)">
-        <div class="text-center">
-          📑<br>
-          <span class="font-medium">Consulting Agreement</span><br>
-          <span class="text-xs text-gray-500">12% usage</span>
-        </div>
-      </label>
+      <!-- Title -->
+      <input type="text" id="contract_title" placeholder="e.g. Software License Agreement - TechCorp" 
+             class="w-full border rounded p-2 mb-6" onkeyup="validateStep1()">
 
-      <!-- Card 5 -->
-      <label class="border rounded p-3 cursor-pointer hover:border-blue-500">
-        <input type="radio" name="contract_type" value="Employment Contract" 
-               class="hidden" onchange="selectFromCard(this)">
-        <div class="text-center">
-          👥<br>
-          <span class="font-medium">Employment Contract</span><br>
-          <span class="text-xs text-gray-500">10% usage</span>
-        </div>
-      </label>
-
-      <!-- Card 6 -->
-      <label class="border rounded p-3 cursor-pointer hover:border-blue-500">
-        <input type="radio" name="contract_type" value="Vendor Agreement" 
-               class="hidden" onchange="selectFromCard(this)">
-        <div class="text-center">
-          🤝<br>
-          <span class="font-medium">Vendor Agreement</span><br>
-          <span class="text-xs text-gray-500">8% usage</span>
-        </div>
-      </label>
+      <!-- Footer -->
+      <div class="flex justify-between">
+        <a href="{{ url_for('index') }}" class="px-4 py-2 rounded bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200">Cancel</a>
+        <button id="nextBtn" disabled onclick="goToStep(2)" class="px-4 py-2 rounded bg-gray-400 text-white cursor-not-allowed">Next Step</button>
+      </div>
     </div>
 
-    <!-- Dropdown -->
-    <select id="contract_dropdown" class="w-full border rounded p-2 mb-4" onchange="validateForm()">
-      <option value="">Browse all contract types (129+ available)</option>
-      <option>Software License</option>
-      <option>Service Agreement</option>
-      <option>Non-Disclosure Agreement</option>
-      <option>Consulting Agreement</option>
-      <option>Employment Contract</option>
-      <option>Vendor Agreement</option>
-      <option>Partnership Agreement</option>
-      <option>Lease Agreement</option>
-      <option>Joint Venture Contract</option>
-      <option>Distribution Agreement</option>
-    </select>
+    <!-- ========== STEP 2 ========== -->
+    <div id="step2" class="step hidden">
+      <div class="w-full bg-gray-200 rounded-full h-1.5 mb-4">
+        <div class="bg-blue-600 h-1.5 rounded-full" style="width: 67%"></div>
+      </div>
+      <p class="text-sm text-gray-600 dark:text-gray-300 mb-4">Step 2 of 3</p>
 
-    <!-- Title -->
-    <input type="text" id="contract_title" onkeyup="validateForm()" 
-           placeholder="e.g. Software License Agreement - TechCorp" 
-           class="w-full border rounded p-2 mb-6">
+      <h2 class="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-100">Financials and Tenure</h2>
 
-    <!-- Footer -->
-    <div class="flex justify-between">
-      <a href="{{ url_for('index') }}" 
-         class="px-4 py-2 rounded bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
-         Cancel
-      </a>
-      <button id="nextBtn" disabled 
-              class="px-4 py-2 rounded bg-gray-400 text-white cursor-not-allowed">
-              Next Step
-      </button>
+      <div class="grid grid-cols-2 gap-4 mb-4">
+        <input type="number" id="contract_value" placeholder="Contract Value" class="border rounded p-2" oninput="validateStep2()">
+        <select id="currency" class="border rounded p-2" onchange="validateStep2()">
+          <option value="">Currency</option>
+          <option>INR</option>
+          <option>USD</option>
+          <option>EUR</option>
+        </select>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4 mb-4">
+        <input type="date" id="start_date" class="border rounded p-2" onchange="validateStep2()">
+        <input type="date" id="end_date" class="border rounded p-2" onchange="validateStep2()">
+      </div>
+
+      <select id="payment_terms" class="w-full border rounded p-2 mb-4" onchange="validateStep2()">
+        <option value="">Payment Terms</option>
+        <option>Net 15 days</option>
+        <option>Net 30 days</option>
+        <option>Net 45 days</option>
+        <option>Net 60 days</option>
+      </select>
+
+      <div class="mb-6">
+        <label class="flex items-center space-x-2">
+          <input type="checkbox" id="auto_renew" class="form-checkbox">
+          <span>Enable automatic renewal</span>
+        </label>
+      </div>
+
+      <!-- Footer -->
+      <div class="flex justify-between">
+        <button onclick="goToStep(1)" class="px-4 py-2 rounded bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200">Previous</button>
+        <div class="space-x-2">
+          <a href="{{ url_for('index') }}" class="px-4 py-2 rounded bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200">Cancel</a>
+          <button id="nextBtn2" disabled onclick="goToStep(3)" class="px-4 py-2 rounded bg-gray-400 text-white cursor-not-allowed">Next Step</button>
+        </div>
+      </div>
     </div>
+
+    <!-- ========== STEP 3 ========== -->
+    <div id="step3" class="step hidden max-h-[70vh] overflow-y-auto pr-2">
+        <div class="w-full bg-gray-200 rounded-full h-1.5 mb-4">
+            <div class="bg-blue-600 h-1.5 rounded-full" style="width: 100%"></div>
+        </div>
+        <p class="text-sm text-gray-600 dark:text-gray-300 mb-4">Step 3 of 3</p>
+
+        <h2 class="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-100">Party Details & Documents</h2>
+
+        <!-- Our Company Info -->
+        <div class="border rounded-lg p-4 mb-4 bg-blue-50 dark:bg-blue-900/20">
+            <h3 class="font-semibold mb-3">Our Company Information</h3>
+            <div class="grid grid-cols-2 gap-4 mb-3">
+            <input type="text" readonly value="ContFlow Technologies Pvt. Ltd." class="border rounded p-2 bg-gray-100 dark:bg-gray-700">
+            <input type="email" readonly value="legal@contflow.com" class="border rounded p-2 bg-gray-100 dark:bg-gray-700">
+            </div>
+            <input type="text" readonly value="Tower A, 4th Floor, Cyber City, Gurgaon, Haryana 122002, India" 
+                class="border rounded p-2 w-full bg-gray-100 dark:bg-gray-700">
+        </div>
+
+        <!-- Counterparty Info -->
+        <div class="border rounded-lg p-4 mb-4 bg-green-50 dark:bg-green-900/20">
+            <h3 class="font-semibold mb-3">Counterparty Information</h3>
+            <div class="grid grid-cols-2 gap-4 mb-3">
+            <input type="text" id="cp_name" placeholder="Enter counterparty name" class="border rounded p-2" oninput="validateStep3()">
+            <input type="email" id="cp_email" placeholder="contact@counterparty.com" class="border rounded p-2" oninput="validateStep3()">
+            </div>
+            <input type="text" id="cp_address" placeholder="Registered Office Address" class="border rounded p-2 w-full" oninput="validateStep3()">
+        </div>
+
+        <!-- Contract Details -->
+        <div class="border rounded-lg p-4 mb-4 bg-gray-50 dark:bg-gray-700/50">
+            <div class="grid grid-cols-2 gap-4 mb-3">
+            <textarea id="contract_desc" placeholder="Contract Description" class="border rounded p-2" oninput="validateStep3()"></textarea>
+            <textarea id="key_deliverables" placeholder="Key Deliverables" class="border rounded p-2" oninput="validateStep3()"></textarea>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4 mb-3">
+            <select id="assignee" class="border rounded p-2" onchange="validateStep3()">
+                <option value="">Assign to</option>
+                <option>John Doe</option>
+                <option>Jane Smith</option>
+                <option>Legal Team</option>
+            </select>
+            <select id="priority" class="border rounded p-2" onchange="validateStep3()">
+                <option>Low Priority</option>
+                <option selected>Medium Priority</option>
+                <option>High Priority</option>
+            </select>
+            </div>
+
+            <textarea id="special_clauses" placeholder="Special Clauses or Requirements" 
+                    class="border rounded p-2 w-full mb-3" oninput="validateStep3()"></textarea>
+
+            <div class="text-sm text-blue-600 dark:text-blue-300 bg-blue-100 dark:bg-blue-900/20 p-2 rounded">
+            💡 AI Enhancement: Our AI will analyze your requirements, party details, and documents to suggest optimal clauses,
+            identify potential risks, and ensure compliance with industry standards.
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="flex justify-between mt-6">
+            <button onclick="goToStep(2)" class="px-4 py-2 rounded bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200">Previous</button>
+            <div class="space-x-2">
+            <a href="{{ url_for('index') }}" class="px-4 py-2 rounded bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200">Cancel</a>
+            <button id="reviewBtn" disabled onclick="populateReview()" class="px-4 py-2 rounded bg-gray-400 text-white cursor-not-allowed">Review</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== STEP 4 ========== -->
+    <div id="step4" class="step hidden max-h-[70vh] overflow-y-auto pr-2">
+        <div class="w-full bg-gray-200 rounded-full h-1.5 mb-4">
+            <div class="bg-blue-600 h-1.5 rounded-full" style="width: 100%"></div>
+        </div>
+        <p class="text-sm text-gray-600 dark:text-gray-300 mb-4">Review All Details</p>
+
+        <h2 class="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-100">Final Contract Review</h2>
+
+        <!-- Review content will be filled dynamically -->
+        <div id="reviewContent" class="space-y-4 text-sm text-gray-700 dark:text-gray-200"></div>
+
+        <!-- Footer -->
+        <div class="flex justify-between mt-6">
+            <button onclick="goToStep(3)" class="px-4 py-2 rounded bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200">Previous</button>
+            <div class="space-x-2">
+            <a href="{{ url_for('index') }}" class="px-4 py-2 rounded bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200">Cancel</a>
+            <button class="px-4 py-2 rounded bg-blue-600 hover:bg-blue-700 text-white">Generate Contract</button>
+            </div>
+        </div>
+    </div>
+
   </div>
-
 </body>
 </html>
