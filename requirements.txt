@@ -1,1 +1,6 @@
 Flask
+google-generativeai
+python-docx
+pyyaml
+Flask-Session
+beautifulsoup4
