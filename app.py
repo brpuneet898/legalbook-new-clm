@@ -12,7 +12,7 @@ from werkzeug.utils import secure_filename
 import yaml
 from flask_session import Session
 from bs4 import BeautifulSoup
-
+import markdown
 
 
 
@@ -46,7 +46,10 @@ TEMPLATE_PATH = r"C:\My Folder\projects\legalbook-new-clm\contracts\General_Cont
 SYSTEM_INSTRUCTION = """You are a senior contracts counsel.
 Given (1) structured deal terms and (2) a base contract template, draft a complete, legally sound contract.
 - Use the template’s structure/sections and fill in placeholders.
-- Insert the provided parties, amounts, dates, deliverables, payment terms, and special clauses faithfully.
+- Insert the provided parties: our company, counterparty, and any additional_parties if present.
+    - For each additional_party, treat its "type" field as the role or identity heading (e.g., Witness, Guarantor, Arbitrator, Affiliate). 
+    - If no additional_parties are provided, ignore this step.
+    - Always reflect their name, email, and registered office address faithfully in the contract.
 - Keep numbering consistent and professional.
 - If you identify missing protections, compliance items, or industry-standard clauses, you may add them proactively (e.g., indemnity, liability caps, data protection, termination rights, governing law, dispute resolution).
 - Analyze our requirements, party details, and documents to suggest optimal clauses, identify potential risks, and ensure compliance with industry standards.
@@ -98,13 +101,19 @@ def generate_contract():
 BASE TEMPLATE (DOCX -> text):
 {template_text if template_text else "[No base template file found or couldn't be read]"}
 
-DEAL TERMS (JSON):
+DEAL TERMS (JSON, includes additional_parties if provided):
 {deal_terms_json}
+
 
 TASK:
 Combine the BASE TEMPLATE and the DEAL TERMS into a complete contract, filling in all specific details.
-Where the template has placeholders like [Party A], [Party B], dates, values, or payment terms, replace them with the DEAL TERMS.
-Ensure clauses that reflect 'special_clauses' are included. Provide a final, clean, ready-to-edit contract text.
+- Replace placeholders like [Party A], [Party B], dates, values, or payment terms with the DEAL TERMS.
+- If "additional_parties" are provided in the JSON, include them explicitly in the contract. 
+  Use their "type" field as the legal identity or role heading (e.g., Witness, Guarantor, Arbitrator, Affiliate). 
+  List their name, email, and registered office appropriately. 
+- If "additional_parties" is empty or missing, omit this step.
+- Ensure clauses that reflect 'special_clauses' are included.
+- Provide a final, clean, ready-to-edit contract text.
 """
 
     # 3) Call Gemini
@@ -117,15 +126,19 @@ Ensure clauses that reflect 'special_clauses' are included. Provide a final, cle
     except Exception as e:
         return f"LLM error: {e}", 502
 
+    html_content = markdown.markdown(
+        text,
+        extensions=["extra", "nl2br", "sane_lists"]
+    )
     # 4) Stash in session and tell client where to go
-    session['generated_contract'] = text
+    session['generated_contract_html'] = html_content
     return jsonify({"redirect_url": url_for('edit_contract')}), 200
 
 
 # ---------- NEW: Editor page to review & edit ----------
 @app.route('/edit-contract')
 def edit_contract():
-    content = session.get('generated_contract')
+    content = session.get('generated_contract_html')
     if not content:
         # If nothing generated yet, send back to AI Draft
         return redirect(url_for('ai_generate_draft'))
@@ -146,14 +159,31 @@ def download_contract():
 
     # Build a basic .docx from the plain text
     doc = Document()
+    soup = BeautifulSoup(content, "html.parser")
 
-    # Split by blank lines into paragraphs
-    for block in content.split("\n\n"):
-        # Keep line breaks within a block
-        for line in block.splitlines():
-            doc.add_paragraph(line)
-        # Add a blank line between blocks
-        doc.add_paragraph()
+    for block in soup.find_all(["h1", "h2", "h3", "p", "li"]):
+        if block.name in ["h1", "h2", "h3"]:
+            level = int(block.name[1])
+            doc.add_heading(block.get_text(strip=True), level=level)
+
+        elif block.name == "p":
+            para = doc.add_paragraph()
+            for child in block.children:
+                if child.name == "strong":
+                    run = para.add_run(child.get_text())
+                    run.bold = True
+                elif child.name == "em":
+                    run = para.add_run(child.get_text())
+                    run.italic = True
+                elif child.name == "u":
+                    run = para.add_run(child.get_text())
+                    run.underline = True
+                elif child.string:
+                    para.add_run(child.string)
+
+        elif block.name == "li":
+            para = doc.add_paragraph("• " + block.get_text(strip=True))
+
 
     # Save to a temp file and return
     with NamedTemporaryFile(delete=False, suffix=".docx") as tmp:

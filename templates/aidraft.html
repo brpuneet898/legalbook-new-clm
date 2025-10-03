@@ -100,11 +100,29 @@
         const cpName = document.getElementById("cp_name").value;
         const cpEmail = document.getElementById("cp_email").value;
         const cpAddress = document.getElementById("cp_address").value;
+
         const desc = document.getElementById("contract_desc").value;
         const deliverables = document.getElementById("key_deliverables").value;
         const assignee = document.getElementById("assignee").value;
         const priority = document.getElementById("priority").value;
         const clauses = document.getElementById("special_clauses").value;
+
+        // Build additional parties HTML
+        let partiesHtml = "";
+        if (additionalParties.length > 0) {
+          partiesHtml = "<hr class='my-2'><div><strong>Additional Parties:</strong></div>";
+          additionalParties.forEach(p => {
+            partiesHtml += `
+              <div class="ml-4">
+                <div><strong>${p.type}</strong></div>
+                <div>Name: ${p.name}</div>
+                <div>Email: ${p.email}</div>
+                <div>Registered Office: ${p.address}</div>
+                <br>
+              </div>
+            `;
+          });
+        }
 
         // Build summary HTML
         const reviewHtml = `
@@ -123,6 +141,8 @@
             <div><strong>Email:</strong> ${cpEmail}</div>
             <div><strong>Registered Office:</strong> ${cpAddress}</div>
 
+            ${partiesHtml}
+
             <hr class="my-2">
             <div><strong>Contract Description:</strong> ${desc}</div>
             <div><strong>Key Deliverables:</strong> ${deliverables}</div>
@@ -136,7 +156,6 @@
         // Move to Step 4
         goToStep(4);
     }
-
   </script>
 </head>
 <body class="bg-gray-100 dark:bg-gray-900 flex items-center justify-center min-h-screen font-sans">
@@ -288,6 +307,32 @@
             <input type="text" id="cp_address" placeholder="Registered Office Address" class="border rounded p-2 w-full" oninput="validateStep3()">
         </div>
 
+        <!-- Additional Parties -->
+        <div class="border rounded-lg p-4 mb-4 bg-purple-50 dark:bg-purple-900/20">
+          <h3 class="font-semibold mb-3 flex items-center space-x-2">
+            <span>👥</span>
+            <span>Additional Parties</span>
+          </h3>
+
+          <!-- Empty state (before any party is added) -->
+          <div id="additional-parties-empty" class="flex flex-col items-center justify-center border border-dashed border-purple-300 rounded-lg p-6 text-center text-purple-600 dark:text-purple-300">
+            <div class="text-3xl mb-2">👥</div>
+            <p class="mb-2">No additional parties added</p>
+            <p class="text-sm text-purple-500">Add witnesses, guarantors, or other parties to this contract</p>
+          </div>
+
+          <!-- Add Party button -->
+          <div class="mt-4 text-right">
+            <button type="button"
+                    id="addPartyBtn"
+                    onclick="openPartyModal()"
+                    class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg">
+              + Add Party
+            </button>
+
+          </div>
+        </div>
+
         <!-- Contract Details -->
         <div class="border rounded-lg p-4 mb-4 bg-gray-50 dark:bg-gray-700/50">
             <div class="grid grid-cols-2 gap-4 mb-3">
@@ -358,8 +403,33 @@
             </div>
         </div>
     </div>
-
   </div>
+
+  <!-- Add Party Modal -->
+  <div id="addPartyModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-[500px] p-6 relative">
+      <h2 class="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-100">Add Additional Party</h2>
+      
+      <div class="space-y-3">
+        <input type="text" id="party_type" placeholder="Party Type (e.g., Witness, Guarantor)" 
+              class="w-full border rounded p-2" required>
+        <input type="text" id="party_name" placeholder="Enter party name" 
+              class="w-full border rounded p-2" required>
+        <input type="email" id="party_email" placeholder="party@example.com" 
+              class="w-full border rounded p-2" required>
+        <input type="text" id="party_address" placeholder="Registered Office Address" 
+              class="w-full border rounded p-2" required>
+      </div>
+
+      <div class="flex justify-end space-x-2 mt-6">
+        <button onclick="closePartyModal()" 
+                class="px-4 py-2 rounded bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200">Cancel</button>
+        <button onclick="addParty()" 
+                class="px-4 py-2 rounded bg-blue-600 hover:bg-blue-700 text-white">Add</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     async function generateContract() {
       const btn = document.getElementById("generateBtn");
@@ -396,7 +466,8 @@
         key_deliverables: document.getElementById("key_deliverables").value,
         assignee: document.getElementById("assignee").value,
         priority: document.getElementById("priority").value,
-        special_clauses: document.getElementById("special_clauses").value
+        special_clauses: document.getElementById("special_clauses").value,
+        additional_parties: additionalParties
       };
 
       try {
@@ -423,6 +494,81 @@
         btn.classList.remove("opacity-60","cursor-not-allowed");
       }
     }
+
+    let additionalParties = [];
+
+    function openPartyModal() {
+      document.getElementById("addPartyModal").classList.remove("hidden");
+    }
+
+    function closePartyModal() {
+      document.getElementById("addPartyModal").classList.add("hidden");
+    }
+
+    function addParty() {
+      const type = document.getElementById("party_type").value.trim();
+      const name = document.getElementById("party_name").value.trim();
+      const email = document.getElementById("party_email").value.trim();
+      const address = document.getElementById("party_address").value.trim();
+
+      if (!type || !name || !email || !address) {
+        alert("All fields are required.");
+        return;
+      }
+
+      const party = { type, name, email, address };
+      const index = additionalParties.length - 1;
+      additionalParties.push(party);
+
+      const partyDiv = document.createElement("div");
+      partyDiv.className = "border rounded-lg p-4 mb-4 bg-yellow-50 dark:bg-yellow-900/20";
+      partyDiv.innerHTML = `
+        <div class="flex justify-between items-center mb-3">
+          <h3 class="font-semibold">${type}</h3>
+          <button type="button" onclick="removeParty(${index}, this)" 
+                  class="text-red-500 hover:text-red-700 font-bold">✖</button>
+        </div>
+        <div class="grid grid-cols-2 gap-4 mb-3">
+          <input type="text" readonly value="${name}" class="border rounded p-2 bg-gray-100 dark:bg-gray-700">
+          <input type="email" readonly value="${email}" class="border rounded p-2 bg-gray-100 dark:bg-gray-700">
+        </div>
+        <input type="text" readonly value="${address}" class="border rounded p-2 w-full bg-gray-100 dark:bg-gray-700">
+      `;
+      const additionalPartiesSection = document.querySelector("#addPartyBtn").closest("div.border");
+      additionalPartiesSection.parentNode.insertBefore(partyDiv, additionalPartiesSection);
+
+      document.getElementById("party_type").value = "";
+      document.getElementById("party_name").value = "";
+      document.getElementById("party_email").value = "";
+      document.getElementById("party_address").value = "";
+
+      closePartyModal();
+    }
+
+    function removeParty(index, btn) {
+      // Remove from array
+      additionalParties.splice(index, 1);
+
+      // Remove the card from UI
+      const card = btn.closest("div.border");
+      if (card) card.remove();
+
+      // Re-index remaining cards’ delete buttons
+      const cards = document.querySelectorAll("#step3 .bg-yellow-50");
+      cards.forEach((c, i) => {
+        const delBtn = c.querySelector("button");
+        if (delBtn) delBtn.setAttribute("onclick", `removeParty(${i}, this)`);
+      });
+    }
+
+    // Close modal when clicking outside
+    window.addEventListener("click", function(e) {
+      const modal = document.getElementById("addPartyModal");
+      if (!modal.classList.contains("hidden") && e.target === modal) {
+        closePartyModal();
+      }
+    });
+
   </script>
 </body>
 </html>
